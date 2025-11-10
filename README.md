@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistem Penjadualan Bas Sekolah</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fff7cc; /* kuning lembut */
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background-color: #002B5B; /* biru gelap */
+      color: #FFD500; /* kuning */
+      padding: 20px 0;
+      text-align: center;
+      font-size: 1.8em;
+      font-weight: bold;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 900px;
+      margin: 30px auto;
+      background-color: white;
+      border: 3px solid #FFD500;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+
+    h2 {
+      text-align: center;
+      color: #002B5B;
+    }
+
+    form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    label {
+      font-weight: bold;
+      color: #002B5B;
+    }
+
+    input, select {
+      padding: 8px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      width: 100%;
+    }
+
+    button {
+      grid-column: span 2;
+      padding: 10px;
+      background-color: #002B5B;
+      color: #FFD500;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #004085;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #002B5B;
+      color: #FFD500;
+    }
+
+    tr:nth-child(even) {
+      background-color: #fdf5d6;
+    }
+
+    .delete-btn {
+      background-color: #D62828; /* merah */
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+
+    .delete-btn:hover {
+      background-color: #b51d1d;
+    }
+
+    .empty {
+      text-align: center;
+      color: gray;
+      padding: 15px;
+    }
+
+    footer {
+      text-align: center;
+      margin: 20px;
+      color: #002B5B;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <header>SISTEM PENJADUALAN BAS SEKOLAH</header>
+
+  <div class="container">
+    <h2>Tambah Jadual Bas</h2>
+    <form id="jadualForm">
+      <div>
+        <label>No. Bas:</label>
+        <input type="text" id="noBas" required placeholder="Contoh: B001">
+      </div>
+
+      <div>
+        <label>Nama Pemandu:</label>
+        <input type="text" id="pemandu" required placeholder="Contoh: Encik Ahmad">
+      </div>
+
+      <div>
+        <label>Laluan:</label>
+        <input type="text" id="laluan" required placeholder="Contoh: Taman Maju - Sekolah">
+      </div>
+
+      <div>
+        <label>Masa:</label>
+        <input type="time" id="masa" required>
+      </div>
+
+      <div>
+        <label>Hari:</label>
+        <select id="hari" required>
+          <option value="">Pilih Hari</option>
+          <option>Isnin</option>
+          <option>Selasa</option>
+          <option>Rabu</option>
+          <option>Khamis</option>
+          <option>Jumaat</option>
+        </select>
+      </div>
+
+      <button type="submit">Tambah Jadual</button>
+    </form>
+
+    <h2>Senarai Jadual Bas</h2>
+    <table id="jadualTable">
+      <thead>
+        <tr>
+          <th>No. Bas</th>
+          <th>Pemandu</th>
+          <th>Laluan</th>
+          <th>Masa</th>
+          <th>Hari</th>
+          <th>Tindakan</th>
+        </tr>
+      </thead>
+      <tbody id="jadualBody">
+        <tr><td colspan="6" class="empty">Tiada jadual direkodkan.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer>&copy; 2025 Pasukan Projek</footer>
+
+  <script>
+    const form = document.getElementById('jadualForm');
+    const jadualBody = document.getElementById('jadualBody');
+
+    function paparkanJadual() {
+      const jadual = JSON.parse(localStorage.getItem('jadualBas')) || [];
+      jadualBody.innerHTML = '';
+
+      if (jadual.length === 0) {
+        jadualBody.innerHTML = '<tr><td colspan="6" class="empty">Tiada jadual direkodkan.</td></tr>';
+        return;
+      }
+
+      jadual.forEach((data, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${data.noBas}</td>
+          <td>${data.pemandu}</td>
+          <td>${data.laluan}</td>
+          <td>${data.masa}</td>
+          <td>${data.hari}</td>
+          <td><button class="delete-btn" onclick="padamJadual(${index})">Padam</button></td>
+        `;
+        jadualBody.appendChild(row);
+      });
+    }
+
+    function padamJadual(index) {
+      const jadual = JSON.parse(localStorage.getItem('jadualBas')) || [];
+      jadual.splice(index, 1);
+      localStorage.setItem('jadualBas', JSON.stringify(jadual));
+      paparkanJadual();
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const dataBaru = {
+        noBas: document.getElementById('noBas').value,
+        pemandu: document.getElementById('pemandu').value,
+        laluan: document.getElementById('laluan').value,
+        masa: document.getElementById('masa').value,
+        hari: document.getElementById('hari').value
+      };
+
+      const jadual = JSON.parse(localStorage.getItem('jadualBas')) || [];
+      jadual.push(dataBaru);
+      localStorage.setItem('jadualBas', JSON.stringify(jadual));
+
+      form.reset();
+      paparkanJadual();
+    });
+
+    window.onload = paparkanJadual;
+  </script>
+</body>
+</html>
